@@ -30,3 +30,10 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secret.GITHUB_TOKEN }}
+
+    - name: Construir y publicar imagen
+      uses: docker/buil-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ghcr.io/${{ github.repository_ower }}/python_app:latest
