@@ -1,25 +1,32 @@
-name: hello world
-on: [push]
+name: build image
+
+on:
+  push:
+    branches: [ example ]
 
 jobs:
-  hello_word:
+
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Clonar el repositorio
-        uses: actions/checkout@v3
+    - name: checkout
+      uses: actions/checkout@v5
 
-      - name: Crear clave ssh
-        env:
-          SSH_KEY: ${{ secrets.SECRET }}
-        run: |
-          echo "$SSH_KEY" > key.pem
-          chmod 600 key.pem
+    - name: configurar python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Instalar dependencias
+      run: pip install flask
 
-      - name: Conexión SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SECRET }}
-          port: 22
-          script: sudo docker run -d --name=grafana1 -p 3001:3000 grafana/grafana
+    - name: ejecutar pruebas unitarias
+      run: python test.python
+    
+    - name: login a Github Packages
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secret.GITHUB_TOKEN }}
